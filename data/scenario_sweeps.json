@@ -1,0 +1,115 @@
+{
+  "interpretation": "Deterministic course-model simulation, not Quanser measurements or parameter reproduction.",
+  "samples_per_trajectory": 401,
+  "nominal_parameters": {
+    "l1": 0.32,
+    "l2": 0.28,
+    "m1": 0.8,
+    "m2": 0.6,
+    "mp": 0.25,
+    "d": 0.36,
+    "gravity": 9.81,
+    "duration": 4.0
+  },
+  "inclination_assumption": "gamma=0 horizontal board; gamma=90 vertical board; in-plane gravity=9.81 sin(gamma); out-of-plane reactions and pen contact/friction not modeled.",
+  "inclination": [
+    {
+      "gamma_deg": 0,
+      "in_plane_gravity_m_s2": 0.0,
+      "peak_left_Nm": 0.15207567924543774,
+      "peak_right_Nm": 0.13289398699747249,
+      "peak_both_Nm": 0.15207567924543774,
+      "static_limit_both_Nm": 0.0
+    },
+    {
+      "gamma_deg": 30,
+      "in_plane_gravity_m_s2": 4.904999999999999,
+      "peak_left_Nm": 4.155735872866653,
+      "peak_right_Nm": 4.1800948273019,
+      "peak_both_Nm": 4.1800948273019,
+      "static_limit_both_Nm": 4.067496705873029
+    },
+    {
+      "gamma_deg": 60,
+      "in_plane_gravity_m_s2": 8.495709211125343,
+      "peak_left_Nm": 7.130923569388993,
+      "peak_right_Nm": 7.157595853626484,
+      "peak_both_Nm": 7.157595853626484,
+      "static_limit_both_Nm": 7.045110954191129
+    },
+    {
+      "gamma_deg": 90,
+      "in_plane_gravity_m_s2": 9.81,
+      "peak_left_Nm": 8.220194519815918,
+      "peak_right_Nm": 8.24743686905552,
+      "peak_both_Nm": 8.24743686905552,
+      "static_limit_both_Nm": 8.13499341174606
+    }
+  ],
+  "duration": [
+    {
+      "duration_s": 2,
+      "path": "safe",
+      "peak_left_Nm": 8.508305441242126,
+      "peak_right_Nm": 8.585695225700368,
+      "peak_both_Nm": 8.585695225700368,
+      "static_limit_both_Nm": 8.13499341174606
+    },
+    {
+      "duration_s": 2,
+      "path": "near",
+      "peak_left_Nm": 369.2398769781409,
+      "peak_right_Nm": 369.5003653567795,
+      "peak_both_Nm": 369.5003653567795,
+      "static_limit_both_Nm": 346.9011994504564
+    },
+    {
+      "duration_s": 4,
+      "path": "safe",
+      "peak_left_Nm": 8.220194519815918,
+      "peak_right_Nm": 8.24743686905552,
+      "peak_both_Nm": 8.24743686905552,
+      "static_limit_both_Nm": 8.13499341174606
+    },
+    {
+      "duration_s": 4,
+      "path": "near",
+      "peak_left_Nm": 352.4083266852589,
+      "peak_right_Nm": 352.55099092703716,
+      "peak_both_Nm": 352.55099092703716,
+      "static_limit_both_Nm": 346.9011994504564
+    },
+    {
+      "duration_s": 8,
+      "path": "safe",
+      "peak_left_Nm": 8.155620318776691,
+      "peak_right_Nm": 8.162872279894307,
+      "peak_both_Nm": 8.162872279894307,
+      "static_limit_both_Nm": 8.13499341174606
+    },
+    {
+      "duration_s": 8,
+      "path": "near",
+      "peak_left_Nm": 348.2004391120384,
+      "peak_right_Nm": 348.3136473196016,
+      "peak_both_Nm": 348.3136473196016,
+      "static_limit_both_Nm": 346.9011994504564
+    },
+    {
+      "duration_s": 16,
+      "path": "safe",
+      "peak_left_Nm": 8.140150138503717,
+      "peak_right_Nm": 8.141731132604004,
+      "peak_both_Nm": 8.141731132604004,
+      "static_limit_both_Nm": 8.13499341174606
+    },
+    {
+      "duration_s": 16,
+      "path": "near",
+      "peak_left_Nm": 347.14846721873323,
+      "peak_right_Nm": 347.25431141774266,
+      "peak_both_Nm": 347.25431141774266,
+      "static_limit_both_Nm": 346.9011994504564
+    }
+  ]
+}

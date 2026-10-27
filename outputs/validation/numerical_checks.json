@@ -1,0 +1,90 @@
+{
+  "trajectory_samples": 1601,
+  "dt_s": 0.0025,
+  "random_seed": 20261025,
+  "random_samples": 500,
+  "random_ne_lagrange_max_abs_Nm": 1.7763568394002505e-15,
+  "path_ne_lagrange_max_abs_Nm": 7.216449660063518e-16,
+  "jacobian_finite_difference_max_abs_m_per_rad": 1.3719003710832567e-10,
+  "mass_min_eigenvalue_random_kg_m2": 0.0061937768180278,
+  "skew_symmetry_max_abs": 4.9750620290112124e-11,
+  "serial_inverse_kinematic_max_m": 1.6711069443220838e-16,
+  "forward_max_joint_error_rad": 1.1817047118611868e-07,
+  "forward_max_position_error_m": 3.416867292364703e-08,
+  "serial_work_energy_max_abs_J": 8.01304732095387e-07,
+  "parallel_closure_max_m": 2.7755575615628914e-16,
+  "parallel_forward_inverse_max_m": 8.326744964519793e-16,
+  "parallel_jacobian_finite_difference_max_abs_m_per_rad": 2.425084577595271e-10,
+  "parallel_virtual_power_max_W": 1.6375789613221059e-15,
+  "parallel_work_energy_max_abs_J": 1.1429543016472365e-06,
+  "parallel_min_abs_det_A": 0.3487158465143738,
+  "parallel_min_abs_Bdiag_m": 0.31638016236494665,
+  "parallel_max_condition_J": 5.555321096010991,
+  "parallel_min_mass_eigenvalue_kg": 0.7010884376007613,
+  "serial_peak_abs_tau_Nm": [
+    0.846178255857642,
+    1.5066375514454915
+  ],
+  "parallel_peak_abs_tau_Nm": [
+    8.220494214808806,
+    8.24767472706327
+  ],
+  "serial_peak_abs_velocity_rad_s": [
+    0.3208483161655347,
+    0.36919503433660333
+  ],
+  "serial_peak_abs_acceleration_rad_s2": [
+    1.1222272610051194,
+    1.0925669514457175
+  ],
+  "parallel_theta_range_rad": [
+    [
+      1.7342289484592786,
+      1.9793223144461831
+    ],
+    [
+      1.1622697879507102,
+      1.4073636589236158
+    ]
+  ],
+  "workspace_grid_shape": [
+    161,
+    251
+  ],
+  "workspace_reachable_count": 13489,
+  "near_singular_max_condition_J": 272.9807499195025,
+  "near_singular_min_abs_det_A": 0.007326425629277195,
+  "near_singular_peak_abs_tau_Nm": [
+    352.6581171055603,
+    352.68547718988265
+  ],
+  "safe_max_unit_vertical_force_torque_m": 0.8960738983781498,
+  "near_max_unit_vertical_force_torque_m": 41.54025785352215,
+  "convergence": [
+    {
+      "max_step_s": 0.04,
+      "max_joint_error_rad": 0.17848591434536298,
+      "max_cartesian_error_m": 0.04623630298543719
+    },
+    {
+      "max_step_s": 0.02,
+      "max_joint_error_rad": 0.0041275046184254816,
+      "max_cartesian_error_m": 0.0011914808960962354
+    },
+    {
+      "max_step_s": 0.01,
+      "max_joint_error_rad": 0.00015030278657968132,
+      "max_cartesian_error_m": 4.3503195654063955e-05
+    },
+    {
+      "max_step_s": 0.005,
+      "max_joint_error_rad": 6.634114499970423e-06,
+      "max_cartesian_error_m": 1.92047824798798e-06
+    },
+    {
+      "max_step_s": 0.0025,
+      "max_joint_error_rad": 2.0105097633393854e-06,
+      "max_cartesian_error_m": 5.821049725679782e-07
+    }
+  ]
+}

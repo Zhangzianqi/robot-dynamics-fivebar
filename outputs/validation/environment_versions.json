@@ -1,0 +1,8 @@
+{
+  "numpy": "2.5.2",
+  "scipy": "1.18.1",
+  "matplotlib": "3.11.1",
+  "PyMuPDF": "2.0",
+  "Pillow": "12.2.0",
+  "original_template_sha256": "9780eec3f55ddafd818e26e0c4d8ca06a40e45fab9db070b0443a7b62fbd7134"
+}

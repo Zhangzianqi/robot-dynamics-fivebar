@@ -1,0 +1,193 @@
+\section{仿真计算与结果分析}
+
+\subsection{描绘轨迹、时间标定与计算流程}
+\label{sec:trajectory}
+
+将笔尖需要描绘的椭圆定义为
+\begin{equation}
+\vect p_s(t)=\begin{bmatrix}0.04\cos\phi(t)\\0.38+0.025\sin\phi(t)\end{bmatrix}\units m,
+\quad 0\leq t\leq T_f=4\units s.
+\label{eq:safe_path}
+\end{equation}
+下标$s$表示本文选择的常规工作轨迹；其“安全”含义仅指本模型与当前模式中远离所考察的运动学奇异性，不代表已经完成碰撞或硬件安全认证。椭圆中心位于两基座中线上方$0.38\units m$，最高、最低点分别为0.405和$0.355\units m$。
+
+为使起止速度和加速度均为零，采用五次时间标定
+\begin{equation}
+\phi(t)=2\pi h(s),\quad h(s)=10s^3-15s^4+6s^5,\quad s=t/T_f.
+\end{equation}
+因此$h(0)=0$、$h(1)=1$，且$h'(0)=h'(1)=h''(0)=h''(1)=0$。以$\omega_\phi=\dot\phi$、$\alpha_\phi=\ddot\phi$表示参数速度与加速度，解析求导得
+\begin{align}
+\dot{\vect p}_s&=\begin{bmatrix}-0.04\sin\phi\,\omega_\phi\\0.025\cos\phi\,\omega_\phi\end{bmatrix},\\
+\ddot{\vect p}_s&=\begin{bmatrix}
+-0.04(\cos\phi\,\omega_\phi^2+\sin\phi\,\alpha_\phi)\\
+0.025(-\sin\phi\,\omega_\phi^2+\cos\phi\,\alpha_\phi)
+\end{bmatrix}.
+\end{align}
+参数角速度随时间变化，故该椭圆不是匀速描绘；五次标定的目的在于起止平滑，而不是让弧长速度恒定。图\ref{fig:path}显示轨迹几何及时间安排。
+
+\figfull{fig02_path_timing.pdf}{竖直板面椭圆轮廓与五次时间标定。几何图使用等比例坐标；时间标定使笔尖从静止出发，并在闭合后回到静止。}{fig:path}
+
+主计算使用1601个均匀时间点，采样间隔为$2.5\units{ms}$。先以解析逆解求各支链角度，再用式\eqref{eq:qdd}计算速度、加速度，随后计算串联及并联逆动力学。绘图不对目标点加噪声，也不对扭矩作平滑后替代原始数据。输出包括原始CSV、完整NPZ数组、关键指标JSON与矢量图，保留对应的计算和绘图代码。
+
+\subsection{从关节空间到末端空间的具体算例}
+
+\subsubsection{独立2R支链的代入计算}
+
+为使公式有可核算的数值落点，取开链状态
+\begin{equation}
+\vect q=\begin{bmatrix}\pi/4\\-\pi/3\end{bmatrix},\quad
+\dot{\vect q}=\begin{bmatrix}0.4\\-0.3\end{bmatrix}\units{rad/s},\quad
+\ddot{\vect q}=\begin{bmatrix}0.6\\0.2\end{bmatrix}\units{rad/s^2}.
+\end{equation}
+该状态用于串联开链的公式检验，不要求它同时属于本文五杆闭环所选的工作区域。由式\eqref{eq:fk}得到相对基座位置$(0.496733,0.153805)^\T\units m$，对应世界坐标$(0.316733,0.153805)^\T\units m$。雅可比为
+\begin{equation}
+\vect J=\begin{bmatrix}-0.153805&0.072469\\0.496733&0.270459\end{bmatrix}\units{m/rad},
+\end{equation}
+其行列式为$-0.077596\units{m^2/rad^2}$，该位形非奇异。代入动力学参数，惯性矩阵及重力项为
+\begin{equation}
+\vect M=\begin{bmatrix}0.198907&0.059920\\0.059920&0.035280\end{bmatrix}\units{kg\,m^2},\quad
+\vect g=\begin{bmatrix}4.233950\\1.459263\end{bmatrix}\units{N\,m}.
+\end{equation}
+逐项计算惯性与速度耦合项：
+\begin{align}
+\vect M\ddot{\vect q}&=(0.131328,0.043008)^\T\units{N\,m},\\
+\vect C\dot{\vect q}&=(-0.006402,-0.006828)^\T\units{N\,m}.
+\end{align}
+两项与重力相加，因此
+\begin{equation}
+\vect\tau=\begin{bmatrix}4.358876\\1.495442\end{bmatrix}\units{N\,m}.
+\end{equation}
+牛顿—欧拉递推代入同一组位置、速度和加速度后得到相同结果。第二关节的力矩虽然主要用于支撑远杆及工具，但也包含第一关节运动通过耦合项带来的惯性影响。
+
+\subsubsection{五杆中心位形的闭环计算}
+
+选取$\vect p=(0,0.38)^\T\units m$，外展工作模式的逆解为
+\begin{equation}
+\vect q_L=\begin{bmatrix}1.856915\\-1.593120\end{bmatrix},\qquad
+\vect q_R=\begin{bmatrix}1.284677\\1.593120\end{bmatrix}\units{rad}.
+\end{equation}
+两个主动角分别约为$106.39^\circ$、$73.61^\circ$，远杆相对角符号相反，符合关于中线镜像的构型。并联雅可比为
+\begin{equation}
+\vect J_p=\begin{bmatrix}-0.165692&-0.165692\\-0.613469&0.613469\end{bmatrix}\units{m/rad}.
+\label{eq:center_jp}
+\end{equation}
+此时$\det\vect A_p=0.503454$、$\kappa_2(\vect J_p)=3.70247$。由式\eqref{eq:center_jp}可见，两电机同向等速运动产生水平方向速度，反向等速运动产生竖直方向速度，这是该对称位形的局部关系，而不是所有位形都成立的全局解耦。
+
+静止时，整机笛卡尔广义重力为$\vect g_x\approx(0,9.34945)^\T\units N$，主动平衡力矩为$(-5.73560,5.73560)^\T\units{N\,m}$。这里$g_{x,y}$是各杆势能沿末端坐标变化的梯度，不等于整机总重量$3.05g_0$；其余支撑作用由基座反力与闭环约束承担，不能把广义力误当作所有杆件重量的直接相加。
+
+\subsection{串联运动学与逆动力学结果}
+
+图\ref{fig:serial_motion}给出左侧串联支链沿主轨迹运动的关节状态。$q_1$约在$99.36^\circ$至$113.41^\circ$之间，$q_2$约在$-98.63^\circ$至$-83.32^\circ$之间，均远离两杆共线的位置。最大关节速度分别为0.321和$0.369\units{rad/s}$，最大加速度分别为1.122和$1.093\units{rad/s^2}$。起止关节速度、加速度均为零，与解析时间标定一致。
+
+\figfull{fig03_serial_kinematics.pdf}{主轨迹对应的左侧2R支链位置、速度与加速度。第二关节采用相对转角定义，不能将其直接作为远杆绝对姿态。}{fig:serial_motion}
+
+图\ref{fig:serial_torque}将串联逆动力学分为惯性项、速度耦合项和重力项。两关节总力矩绝对峰值分别为0.846和$1.507\units{N\,m}$。第一关节的重力项绝对峰值约为$0.828\units{N\,m}$，惯性项约为$0.135\units{N\,m}$；第二关节相应为1.489和$0.0254\units{N\,m}$。速度耦合项峰值均约为$0.005\units{N\,m}$，在本例$4\units s$描绘周期下相对较小。
+
+该分解表明，主轨迹的串联负载以重力为主要量级，但不能据此在模型中删除惯性项。一方面，各分量的峰值发生时刻并不完全相同，总峰值不等于分量峰值的简单相加；另一方面，缩短执行时间会提高速度和加速度，使惯性及速度二次项随$1/T_f^2$增大。由此，准静态近似是否合适取决于轨迹时间，而不仅取决于机构尺寸。
+
+\figfull{fig05_serial_torques.pdf}{主轨迹的串联关节力矩及其组成。各分量按同一坐标正方向带符号相加；图中力矩属于解除闭环后的2R独立支链。}{fig:serial_torque}
+
+\subsection{模型互证、正动力学回放与能量检验}
+\label{sec:validation}
+
+为区分推导错误、程序实现错误和积分误差，设置三类互补校核。第一类对雅可比、惯性矩阵和反对称性质进行代数或差分检查。第二类以完全独立的牛顿—欧拉递推核对串联拉格朗日力矩。第三类将规划轨迹的逆动力学力矩输入正动力学，并比较运动和能量结果。随机检验固定种子20261025，生成500组$q_1\in[-\pi,\pi]$、$q_2\in[-2.8,-0.2]$、$\dot q_i\in[-2,2]$、$\ddot q_i\in[-5,5]$的状态；角度和导数量纲分别为rad、rad/s与rad/s$^2$。
+
+\begin{table}[htbp]
+\centering\caption{主计算的模型一致性检验}\label{tab:validation}
+\small\begin{tabularx}{\linewidth}{@{}Xl@{}}\toprule 检验量 & 实际结果\\\midrule
+2R解析雅可比与中心差分最大元素差 & $1.37\times10^{-10}\units{m/rad}$\\
+随机状态NE与拉格朗日最大力矩差 & $1.78\times10^{-15}\units{N\,m}$\\
+随机惯性矩阵最小特征值 & $0.00619\units{kg\,m^2}$\\
+$\dot{\vect M}-2\vect C$反对称残差/(kg$\cdot$m$^2$/s) & $4.98\times10^{-11}$\\
+2R逆解代回正解最大位置差 & $1.67\times10^{-16}\units m$\\
+串联正动力学回放最大位置差 & $3.42\times10^{-8}\units m$\\
+串联累计驱动功与机械能变化最大差 & $8.01\times10^{-7}\units J$\\
+五杆左右支链最大闭合差 & $2.78\times10^{-16}\units m$\\
+五杆正逆运动学最大位置差 & $8.33\times10^{-16}\units m$\\
+五杆雅可比与正解中心差分最大元素差 & $2.43\times10^{-10}\units{m/rad}$\\
+并联累计驱动功与机械能变化最大差 & $1.14\times10^{-6}\units J$\\\bottomrule
+\end{tabularx}
+\end{table}
+
+串联正动力学采用DOP853求解器，相对容差$10^{-10}$、绝对容差$10^{-12}$，最大内部步长$0.01\units s$。驱动输入在每次求解器调用时由连续解析轨迹计算，未以粗采样阶梯扭矩替代。最大关节偏差为$1.18\times10^{-7}\units{rad}$，位置偏差如图\ref{fig:validation}所示。两种逆动力学力矩的差接近双精度浮点运算舍入量级，说明本次实现中惯性、重力及工具项一致。
+
+\figfull{fig06_validation.pdf}{主轨迹模型核验。包括串联正动力学回放位置偏差、两种逆动力学力矩差、驱动功与机械能变化及串并联功—能残差。极小残差用于检查数值一致性。}{fig:validation}
+
+对并联模型还以50组随机状态独立计算$\vect M_x$的空间中心差分及总势能梯度，并由Christoffel公式重建笛卡尔速度二次项。该计算与支链投影式\eqref{eq:assembled}得到的主动扭矩最大差约为$7.00\times10^{-10}\units{N\,m}$，与微分步长$10^{-6}\units m$对应的差分误差量级相符。相较于直接核对$\vect\tau_\theta^\T\dot{\vect\theta}=\vect F_x^\T\dot{\vect p}$，这一检验对动力学漏项具有更强的独立性，因为虚功等式也可能仅由同一转置映射自动成立。
+
+为了评估时间积分敏感性，另使用RK45、相对容差$10^{-6}$和绝对容差$10^{-9}$，逐步减小允许的最大步长，结果见表\ref{tab:convergence}。较粗步长下，开环回放末端误差明显累积；减小步长后误差降低。表中的最大步长是求解器内部步长上限，不等于输出采样间隔。它说明高精度回放需要合适的数值积分设置，不能仅以输出点密集判断求解准确。
+
+\begin{table}[htbp]
+\centering\caption{RK45积分步长敏感性，其他模型与轨迹条件保持一致}\label{tab:convergence}
+\begin{tabular}{ccc}\toprule 最大内部步长/s & 最大关节偏差/rad & 最大末端偏差/m\\\midrule
+0.0400 & $1.78\times10^{-1}$ & $4.62\times10^{-2}$\\
+0.0200 & $4.13\times10^{-3}$ & $1.19\times10^{-3}$\\
+0.0100 & $1.50\times10^{-4}$ & $4.35\times10^{-5}$\\
+0.0050 & $6.63\times10^{-6}$ & $1.92\times10^{-6}$\\
+0.0025 & $2.01\times10^{-6}$ & $5.82\times10^{-7}$\\\bottomrule
+\end{tabular}
+\end{table}
+
+以上检查验证的是设计模型在各数学表示及数值实现之间的一致性。位置误差小于微米，不意味着Quanser实物或课程设计样机具有同等定位精度；真实系统仍受编码器分辨率、标定误差、杆件柔性、传动摩擦和笔尖接触影响。
+
+\subsection{五杆工作空间与整机逆动力学}
+
+在$x\in[-0.55,0.55]\units m$、$y\in[0.01,0.60]\units m$的区域内建立$251\times161$网格。每个点先检查两侧圆环可达条件，再固定外展逆解分支，排除矩阵退化点，最后确认所选上方正解与该点重合。图\ref{fig:workspace}因此显示的是“外展工作模式、上方装配模式”的工作空间子集，而不是所有模式并集。该离散图没有处理实际杆宽、传动壳体和关节限位，不能直接替代实体设备可用域。
+
+\figfull{fig07_parallel_workspace.pdf}{指定工作模式和装配模式下的五杆工作空间与位置雅可比条件数。色阶显示方向各向异性，叠加两条对照轮廓；未显示的区域可能不可达，也可能不属于当前选定模式。}{fig:workspace}
+
+主轨迹上$\min|\det\vect A_p|=0.348716$、$\min_i|b_i|=0.316380\units m$，最大条件数为5.55532。因此，在本次采样中两个闭环矩阵均远离退化。图\ref{fig:parallel_motion}展示主动角变化与奇异性指标，两个主动角变化连续，未发生工作模式切换。
+
+\figfull{fig08_parallel_kinematics.pdf}{主轨迹下五杆主动关节运动及闭环映射指标。$\det\vect A_p$与$\vect B_p$对角元素分别用于识别并联侧与串联侧退化，不能仅依靠一项指标判断所有奇异性。}{fig:parallel_motion}
+
+按整机动力学计算，左右电机力矩绝对峰值分别为8.220和$8.248\units{N\,m}$。图\ref{fig:parallel_dyn}同时给出所需笛卡尔力及等效惯性变化。沿主轨迹，$\vect M_x$的最小特征值为$0.7011\units{kg}$，在该区域保持正定。与独立2R支链相比，整机包含另外两根杆且约束关系改变，主动关节也不同；两者峰值不能被解读为对串联、并联拓扑能效的公平优劣比较。这里真正需要说明的是：并联电机必须承担全部构件运动经闭环传递后的负载，而不是简单取一侧支链的力矩或将载荷平均除以二。
+
+\figfull{fig09_parallel_dynamics.pdf}{主轨迹的并联整机动力学。主动驱动力矩由两条不含工具质量的支链贡献和唯一一份工具贡献组装，并通过闭环雅可比转置映射得到。}{fig:parallel_dyn}
+
+\subsection{近奇异轨迹与相同载荷下的传力对照}
+\label{sec:near}
+
+为分析轮廓位置选择的影响，设置第二条几何上仍可达的轨迹
+\begin{equation}
+\vect p_n(t)=\begin{bmatrix}0.04\cos\phi(t)\\0.34+0.035\sin\phi(t)\end{bmatrix}\units m.
+\end{equation}
+其最低点为$(0,0.305)^\T\units m$，仅比式\eqref{eq:singular_point}的并联奇异高度高约$1.03\units{mm}$。主计算的离散结果列于表\ref{tab:paths}，曲线比较见图\ref{fig:near}。
+
+\begin{table}[htbp]
+\centering\caption{两条轮廓的闭环映射与动力学对照，均采用1601点}\label{tab:paths}
+\small\begin{tabularx}{\linewidth}{@{}Xcc@{}}\toprule 指标 & 主轨迹 & 近奇异轨迹\\\midrule
+最低高度/m & 0.355 & 0.305\\
+最小$|\det\vect A_p|$ & 0.348716 & 0.00732643\\
+最大$\kappa_2(\vect J_p)$ & 5.555 & 272.981\\
+左电机最大绝对力矩/(N$\cdot$m) & 8.220 & 352.658\\
+右电机最大绝对力矩/(N$\cdot$m) & 8.248 & 352.685\\\bottomrule
+\end{tabularx}
+\end{table}
+
+近奇异轨迹的条件数约为主轨迹最大值的49倍，驱动力矩峰值显著升高。此时两侧2R支链并未伸直，问题来自$\vect A_p$的两行接近线性相关，即两根远杆接近水平反向。需要区分两个方向的映射：给定电机速度时，$\vect J_p$会在某方向强烈放大末端速度和关节扰动；给定末端速度时，主动角速度并不必然暴增，某方向反而可能变小。条件数大反映方向性和敏感性恶化，而不是所有输入输出量都同时增大。
+
+\figfull{fig10_singularity_comparison.pdf}{主轨迹与近奇异轨迹的条件数、最大电机力矩幅值及单位竖直等效力传力增益。纵轴采用对数尺度，以展示逼近并联奇异时的变化；两条轨迹均未穿越精确奇异点。}{fig:near}
+
+两条轨迹的高度与竖向半径同时变化，因此仅凭动态力矩峰值不能将其差异全部归因于单一因素。为单独检查几何传力，在两个代表位形上施加相同笛卡尔等效力$\vect F=(0,1)^\T\units N$，并只计算$\vect\tau=\vect J_p^\T\vect F$，结果为
+\begin{align}
+\vect p_a=(0,0.355)^\T\units m:&\quad \vect\tau=(-0.89607,0.89607)^\T\units{N\,m},\\
+\vect p_b=(0,0.305)^\T\units m:&\quad \vect\tau=(-41.5399,41.5399)^\T\units{N\,m}.
+\end{align}
+同一$1\units N$等效竖直力对应的单电机力矩幅值增大约46.36倍，说明几何传力关系本身已严重恶化。这一比较不叠加杆件自重，目的在于隔离雅可比的作用；实际整机静止支撑还需加入全部杆件势能对应的广义重力。
+
+在近奇异代表点，整机自重对应的两主动平衡力矩约为$\pm347.07\units{N\,m}$。因此，这类轮廓布置即使在几何上有逆解，也不应仅靠提高驱动指令幅值实现。更合理的设计是调整板面轮廓位置、改变几何尺寸或工作模式，使工作区域与并联奇异边界保持足够距离。
+
+\subsection{安装方向、执行时间与实际描绘场景}
+\label{sec:scenario}
+
+与桌面绘图实物对应，设工件平面相对水平面倾角为$\gamma$，在平面内选择$y$沿最大上坡方向。面内重力大小为$g_0\sin\gamma$；水平时为零，竖直时为$g_0$。忽略法向运动与摩擦时，只需在面内动力学中作$g_0\mapsto g_0\sin\gamma$的替换，惯性矩阵不变。这一处理不表示水平机构没有重量，而是其重量主要由法向结构支撑，未直接进入理想二维运动方程。
+
+\input{scenario_results}
+
+\subsection{模型适用范围与工程改进}
+
+上述结果把几何规划与驱动负载联系起来，但仍有三项与真实绘图直接相关的边界。首先，落笔后的笔尖摩擦会在板面内产生外力，实际模型应辨识其方向及随法向压笔力变化的规律，并作为$\vect f_{\mathrm{ext}}$加入式\eqref{eq:parallel_dyn}。本文无接触模型，因而未预测线条粗细、纸面摩擦或接触稳定性。其次，实物电机和传动的转子惯量、减速比与效率会改变电机轴端的转速和力矩需求；本文所有主动力矩均为机构关节输出端力矩，不能直接拿来与电机轴额定力矩比较。
+
+第三，接近奇异位形时，关节柔性、杆件弹性和标定误差对末端表现的影响可能增大。本文条件数描述的是理想位置雅可比的局部线性映射，不等价于实体刚度测量，也不能据此给出实际定位误差的数值。后续若搭建或使用真实平台，应先测量杆长、质心和摩擦，再进行低速无接触轨迹校验，最后加入压笔与接触负载进行实验比较。
+
+对当前设计任务，最直接的结论是先选工作区域，再设轨迹速度，最后核对驱动能力。工作区域筛选应同时满足逆解可达、模式连续、奇异性裕量、关节限位和杆件干涉约束。单纯缩短描绘时间会提高惯性负载；单纯放慢运动也无法消除近奇异位形下的静态传力问题。由此，运动学与动力学应在同一设计流程中联合使用。
